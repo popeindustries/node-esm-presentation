@@ -1,0 +1,14 @@
+{
+  "name": "node-esm-presentation",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "dvlp": "^13.3.2"
+  },
+  "scripts": {
+    "dev": "dvlp --port 8888",
+    "open": "open -a \"Google Chrome\" http://localhost:8888?showtime",
+    "start": "npm run open && npm run dev -- --silent"
+  }
+}

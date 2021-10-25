@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Node.js esm</title>
+    <script type="module" src="assets/highlight.js"></script>
+    <script type="module" src="src/presentable-show.js"></script>
+    <link rel="stylesheet" type="text/css" href="src/index.css" />
+    <link rel="stylesheet" type="text/css" href="assets/zenburn.css" />
+    <link rel="stylesheet" type="text/css" href="src/slides.css" />
+    <script type="module">
+      hljs.initHighlightingOnLoad();
+    </script>
+  </head>
+  <body>
+    <pres-show>
+      <pres-slide id="intro">
+        <h1>Node.js <code>ESM</code></h1>
+
+        <pres-cue slot="cues">Showtime!</pres-cue>
+      </pres-slide>
+
+      <pres-slide id="cjs-v-esm" class="side-by-side">
+        <div>
+          <h2>CJS</h2>
+          <h3>CommonJS modules</h3>
+          <h4>(Node.js v0 — v12.1)</h4>
+
+          <pre class="code"><code class="js">
+            // import of module.exports object
+            const Widget = require('./widget.js');
+            // import of exports['named'] object
+            const { createId } = require('./utils.js');
+
+            // default export
+            module.exports = new Widget();
+            // named export
+            module.exports.id = createId();
+          </code></pre>
+        </div>
+
+        <pres-cue slot="cues">CJS modules use require and module.exports</pres-cue>
+
+        <div>
+          <h2>ESM</h2>
+          <h3>ECMAScript modules</h3>
+          <h4>(Node.js v12.2+)</h4>
+
+          <pre class="code"><code class="js">
+            // import of default export
+            import Widget from './widget.js';
+            // import of named export
+            import { createId } from './utils.js';
+
+            // default export
+            export default new Widget();
+            // named export
+            export const id = createId();
+          </code></pre>
+        </div>
+
+        <pres-cue slot="cues" step>ECMAScript modules use import/export keywords</pres-cue>
+      </pres-slide>
+
+      <pres-slide id="differences">
+        <h2>What's the difference?</h2>
+        <ul>
+          <li>Mandatory file extensions: <code class="negative compact">import './utils.js';</code></li>
+          <li>
+            No automatic discovery of package files: <code class="negative compact">import './helpers/index.js';</code>
+          </li>
+          <li>
+            Import paths must be valid hrefs: <code class="negative compact">import 'file:///absolute/path.js';</code>
+          </li>
+          <li>All modules <code class="negative compact">use strict;</code> by default</li>
+          <li>
+            No <code class="negative compact">__filename</code> or <code class="negative compact">__dirname</code>
+          </li>
+          <li>No JSON module loading</li>
+          <li>Top-level <code class="negative compact">await</code></li>
+        </ul>
+
+        <pres-cue slot="cues">what are the differences between esm and cjs?</pres-cue>
+        <pres-cue slot="cues" step>file extensions</pres-cue>
+        <pres-cue slot="cues" step>no auto index.js for packages</pres-cue>
+        <pres-cue slot="cues" step>valid urls</pres-cue>
+        <pres-cue slot="cues" step>use strict; by default</pres-cue>
+        <pres-cue slot="cues" step>no magic __filename or __dirname</pres-cue>
+        <pres-cue slot="cues" step>no importing of JSON files</pres-cue>
+        <pres-cue slot="cues" step>top-level await without wrapping async function</pres-cue>
+      </pres-slide>
+
+      <pres-slide id="execution">
+        <h2>What's <em>really</em> different?</h2>
+        <p><code>require</code> <em>is sync,</em> <code>import</code> <em>is async</em></p>
+        <div class="side-by-side">
+          <p class="warning">ESM and CJS dependency trees don't execute in the same order</p>
+          <pre class="code"><code class="bash">
+            # import order
+            main.js > a.js > b.js
+
+            # cjs execution order
+            main.js > a.js > b.js
+
+            # esm execution order
+            b.js > a.js > main.js
+          </code></pre>
+        </div>
+
+        <pres-cue slot="cues">sync vs. async. can import cjs, but not require esm</pres-cue>
+        <pres-cue slot="cues" step>but beware difference in execution order!</pres-cue>
+      </pres-slide>
+
+      <pres-slide id="how-convert" class="how">
+        <h2>How?</h2>
+        <h3>Convert project source</h3>
+
+        <ul>
+          <li>
+            Replace static uses of <code>require()</code> with <code>import</code>:
+            <pre class="code"><code class="js">
+              // const Widget = require('./widget.js');
+              import Widget from './widget.js';
+              // const { useRef } = require('react');
+              import { useRef } from 'react';
+            </code></pre>
+          </li>
+          <li>
+            Replace dynamic uses of <code>require()</code> with <code>import()</code>:
+            <pre class="code"><code class="js">
+              const debugHref = isDev ? './dev-debug.js' : './prod-debug.js';
+              // const debugger = require(debugHref);
+              const debugger = await import(debugHref);
+            </code></pre>
+          </li>
+          <li>
+            Replace uses of <code>__dirname</code> with this magic incantation:
+            <pre class="code"><code class="js">
+              import { dirname } from 'path';
+              import { fileURLToPath } from 'url';
+
+              const __dirname = dirname(fileURLToPath(import.meta.url));
+            </code></pre>
+          </li>
+        </ul>
+
+        <pres-cue slot="cues">first step is convert source code</pres-cue>
+        <pres-cue slot="cues" step>replace static requires</pres-cue>
+        <pres-cue slot="cues" step>replace dynamic requires</pres-cue>
+        <pres-cue slot="cues" step>replace __dirname</pres-cue>
+      </pres-slide>
+
+      <pres-slide id="how-mode" class="how">
+        <h2>How?</h2>
+        <h3>Run code in ESM mode</h3>
+
+        <ul>
+          <li>
+            Add <code>type=module</code> to your <code>package.json</code>:
+            <pre class="code"><code class="json">
+              {
+                "name": "my-app",
+                "version": "1.0.0",
+                "type": "module",
+                "private": true,
+                ...
+              }
+            </code></pre>
+          </li>
+          <li>
+            Use <code>.mjs</code> file extension:
+            <pre class="code"><code class="bash">
+              $ node ./script.mjs
+            </code></pre>
+          </li>
+        </ul>
+
+        <pres-cue slot="cues">force esm mode for all project code (cjs still default)</pres-cue>
+        <pres-cue slot="cues" step>add type=module</pres-cue>
+        <pres-cue slot="cues" step>add .mjs extension</pres-cue>
+      </pres-slide>
+
+      <pres-slide id="how-dependencies" class="how">
+        <h2>How?</h2>
+        <h3>Work with CJS dependencies</h3>
+
+        <pre class="code"><code class="nohighlight">
+            import { something } from 'somewhere';
+            ^^^^^^
+
+            SyntaxError: Cannot use import statement outside a module
+                at Object.compileFunction (node:vm:352:18)
+                at wrapSafe (node:internal/modules/cjs/loader:1031:15)
+                at Module._compile (node:internal/modules/cjs/loader:1065:27)
+                at Object.Module._extensions..js (node:internal/modules/cjs/loader:1153:10)
+                at Module.load (node:internal/modules/cjs/loader:981:32)
+                at Function.Module._load (node:internal/modules/cjs/loader:822:12)
+                at Module.require (node:internal/modules/cjs/loader:1005:19)
+                at require (node:internal/modules/cjs/helpers:102:18)
+        </code></pre>
+
+        <ul>
+          <li>
+            Add empty <code>package.json</code> with <code>type=commonjs</code> to a directory:
+            <pre class="code"><code class="bash">
+              .storybook
+                ⌙ manager.js
+                ⌙ package.json
+                ⌙ preview.js
+            </code></pre>
+          </li>
+          <li>
+            Use <code>.cjs</code> file extension:
+            <pre class="code"><code class="bash">
+              .eslintrc.cjs
+              stylelint.config.cjs
+            </code></pre>
+          </li>
+        </ul>
+
+        <pres-cue slot="cues">sometimes get errors from dependencies trying to require() in esm mode</pres-cue>
+        <pres-cue slot="cues" step>add empty type=commonjs package.json in directory read by CJS dependency</pres-cue>
+        <pres-cue slot="cues" step>rename files with .cjs extension</pres-cue>
+      </pres-slide>
+
+      <pres-slide id="how-ts" class="how">
+        <h2>How?</h2>
+        <h3>Work with TypeScript</h3>
+
+        <pres-cue slot="cues">working with TypeScript requires a transform (avoid ts-node)</pres-cue>
+
+        <ul>
+          <li>
+            Use a <code>--experimental-loader</code> hook to transform source on the fly:
+            <pre class="code"><code class="json">
+              {
+                "name": "my-app",
+                "version": "1.0.0",
+                "type": "module",
+                "private": true,
+                "scripts": {
+                  "test": "mocha --loader='esbuild-node-loader' 'src/**/*.test.ts'"
+                },
+                "devDependencies": {
+                  "esbuild-node-loader": "~0.4.0"
+                }
+              }
+            </code></pre>
+          </li>
+        </ul>
+
+        <pres-cue slot="cues" step>transform source on the fly with new experimental loader API</pres-cue>
+
+        <p class="warning">Broken in Node v16.12.0+</p>
+
+        <pres-cue slot="cues" step>warning: experimental loader broken in newer versions of Node</pres-cue>
+      </pres-slide>
+
+      <pres-slide id="outro">
+        <h1>👋🏼 <code>require()</code></h1>
+
+        <pres-cue slot="cues">Show's over!</pres-cue>
+      </pres-slide>
+    </pres-show>
+  </body>
+</html>

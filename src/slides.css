@@ -1,0 +1,104 @@
+:root {
+  --colour-html-templates: gold;
+  --colour-custom-elements: aqua;
+  --colour-shadow-dom: chartreuse;
+  --transition-slide: all 300ms 50ms cubic-bezier(0.215, 0.61, 0.355, 1);
+  --transition-fade: opacity 150ms linear;
+}
+
+li > code,
+p > code,
+h2 > code,
+h1 > code {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: var(--box-border-radius);
+  padding: 0 0.2em;
+}
+
+#intro,
+#outro {
+  background-color: hotpink;
+}
+
+#cjs-v-esm {
+  align-items: center;
+  background-color: aqua;
+  padding: 4vh 10vh;
+}
+#cjs-v-esm div:nth-of-type(2) {
+  opacity: 0;
+  transform: translateX(200%);
+  transition: var(--transition-slide);
+}
+#cjs-v-esm[step-1] div:nth-of-type(2) {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+#differences {
+  background-color: gold;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#differences li {
+  list-style: circle;
+  opacity: 0;
+  transition: var(--transition-fade);
+}
+#differences[step-1] li:nth-of-type(1),
+#differences[step-2] li:nth-of-type(2),
+#differences[step-3] li:nth-of-type(3),
+#differences[step-4] li:nth-of-type(4),
+#differences[step-5] li:nth-of-type(5),
+#differences[step-6] li:nth-of-type(6),
+#differences[step-7] li:nth-of-type(7) {
+  opacity: 1;
+}
+
+#execution {
+  align-items: center;
+  background-color: crimson;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#execution .side-by-side {
+  opacity: 0;
+  transition: var(--transition-fade);
+}
+#execution .warning {
+  align-items: center;
+  display: flex;
+  margin: 0.7em;
+  text-align: center;
+}
+#execution[step-1] .side-by-side {
+  opacity: 1;
+}
+
+.how {
+  background-color: peachpuff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.how li {
+  opacity: 0;
+  transition: var(--transition-fade);
+}
+.how[step-1] li:nth-of-type(1),
+.how[step-2] li:nth-of-type(2),
+.how[step-3] li:nth-of-type(3) {
+  opacity: 1;
+}
+
+#how-ts p.warning {
+  align-self: center;
+  opacity: 0;
+  transition: var(--transition-fade);
+  width: 50%;
+}
+#how-ts[step-2] p.warning {
+  opacity: 1;
+}
