@@ -284,6 +284,7 @@ class PresentableShow extends HTMLElement {
    * @param { number | false } index
    */
   async _postToEventServer(index) {
+    return;
     try {
       await fetch(EVENT_SERVER, {
         method: 'POST',

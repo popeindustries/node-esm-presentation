@@ -102,3 +102,9 @@ h1 > code {
 #how-ts[step-2] p.warning {
   opacity: 1;
 }
+
+#outro p {
+  position: absolute;
+  right: 2vw;
+  bottom: 2vh;
+}
